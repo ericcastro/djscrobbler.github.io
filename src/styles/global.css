@@ -189,9 +189,9 @@ button {
 .theme-dot {
   width: 44px;
   height: 28px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 3px;
   padding: 5px 6px;
   color: var(--text);
@@ -223,12 +223,14 @@ button {
 
 .hero {
   position: relative;
+  width: min(100%, 1800px);
+  margin-inline: auto;
   min-height: 92vh;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(440px, 0.72fr);
+  grid-template-columns: minmax(620px, 0.92fr) minmax(520px, 0.74fr);
   align-items: center;
-  gap: 38px;
-  padding: 118px 6vw 96px;
+  gap: 56px;
+  padding: 118px clamp(48px, 6vw, 110px) 96px;
   overflow: hidden;
   border-bottom: 1px solid var(--border);
 }
@@ -264,7 +266,8 @@ button {
 .hero-copy {
   position: relative;
   z-index: 4;
-  width: min(860px, 100%);
+  width: 100%;
+  min-width: 0;
 }
 
 .hero-lockup {
@@ -289,10 +292,11 @@ button {
 .eyebrow {
   margin: 10px 0 12px;
   color: var(--accent2);
-  font-size: 12px;
+  font-size: clamp(10px, 0.72vw, 12px);
   font-weight: 760;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  white-space: nowrap;
 }
 
 h1,
@@ -304,9 +308,10 @@ p {
 
 h1 {
   margin-bottom: 20px;
-  font-size: 72px;
+  font-size: clamp(48px, 4.35vw, 72px);
   line-height: 0.98;
   letter-spacing: 0;
+  white-space: nowrap;
 }
 
 h2 {
@@ -397,7 +402,7 @@ h3 {
   z-index: 3;
   align-self: center;
   justify-self: end;
-  width: min(39vw, 620px);
+  width: min(40vw, 720px);
 }
 
 .screenshot-card.is-fading img {
@@ -506,7 +511,7 @@ h3 {
 }
 
 .feature-grid article {
-  min-height: 246px;
+  min-height: 160px;
   padding: 22px;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -614,18 +619,18 @@ h3 {
   font-size: 12px;
 }
 
-@media (max-width: 1240px) {
+@media (max-width: 1500px) {
   .hero {
-    grid-template-columns: minmax(0, 1fr) minmax(340px, 0.62fr);
-    gap: 28px;
-    padding-inline: 5vw;
+    grid-template-columns: minmax(520px, 0.9fr) minmax(430px, 0.7fr);
+    gap: 34px;
+    padding-inline: 6vw;
   }
 
   .hero-icon {
-    width: 138px;
-    height: 138px;
-    flex-basis: 138px;
-    border-radius: 28px;
+    width: 146px;
+    height: 146px;
+    flex-basis: 146px;
+    border-radius: 30px;
   }
 
   .hero-lockup {
@@ -633,15 +638,11 @@ h3 {
   }
 
   .hero-actions {
-    margin-left: 162px;
+    margin-left: 170px;
   }
 
   .screenshot-stage {
-    width: min(38vw, 540px);
-  }
-
-  h1 {
-    font-size: 58px;
+    width: min(39vw, 600px);
   }
 
   .lede {
@@ -649,17 +650,19 @@ h3 {
   }
 }
 
-@media (max-width: 1060px) {
+@media (max-width: 1220px) {
   .hero {
     min-height: auto;
     grid-template-columns: 1fr;
     align-items: start;
-    gap: 32px;
+    justify-items: center;
+    gap: 34px;
     padding: 112px 7vw 122px;
   }
 
   .hero-copy {
     width: min(760px, 100%);
+    justify-self: center;
   }
 
   .hero-lockup {
@@ -678,19 +681,22 @@ h3 {
   }
 
   .screenshot-stage {
-    width: min(100%, 720px);
-    justify-self: end;
+    width: min(100%, 780px);
+    justify-self: center;
   }
 
   h1 {
     font-size: 52px;
   }
 
+  .eyebrow {
+    font-size: 11px;
+  }
+
   .lede {
     width: min(620px, 100%);
     font-size: 16px;
   }
-
 }
 
 @media (max-width: 900px) {
@@ -705,7 +711,6 @@ h3 {
 
   .hero {
     min-height: 90vh;
-    grid-template-columns: 1fr;
     gap: 34px;
     padding: 104px 24px 88px;
   }
@@ -730,29 +735,79 @@ h3 {
   }
 
   .hero-lockup {
-    gap: 22px;
+    gap: 18px;
   }
 
   .hero-actions {
-    margin-left: 118px;
-  }
-
-  .screenshot-stage {
-    width: min(100%, 620px);
-    justify-self: start;
+    margin-left: 114px;
   }
 
   h1 {
-    font-size: 50px;
+    font-size: 46px;
   }
 
-  h2 {
-    font-size: 30px;
+  .eyebrow {
+    font-size: 10px;
+  }
+
+  .screenshot-stage {
+    width: min(100%, 680px);
+    justify-self: center;
   }
 
   .lede {
     font-size: 16px;
   }
+}
+
+@media (max-width: 720px) {
+  .hero {
+    padding: 96px 22px 82px;
+  }
+
+  .hero-copy {
+    width: 100%;
+  }
+
+  .hero-lockup {
+    display: grid;
+    grid-template-columns: 76px minmax(0, 1fr);
+    align-items: start;
+    gap: 16px;
+  }
+
+  .hero-icon {
+    width: 76px;
+    height: 76px;
+    border-radius: 16px;
+    margin-top: 0;
+  }
+
+  h1 {
+    font-size: clamp(36px, 8.2vw, 46px);
+  }
+
+  .eyebrow {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .lede {
+    grid-column: 1 / -1;
+    font-size: 15px;
+  }
+
+  .hero-actions {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  h2 {
+    font-size: 30px;
+  }
+
 
   .feature-band,
   .app-band,
@@ -791,26 +846,57 @@ h3 {
   }
 
   .theme-dot {
-    width: 38px;
+    width: 36px;
+    height: 28px;
+    padding: 5px;
+    gap: 4px;
+  }
+
+  .theme-dot span:not(.sr-only) {
+    width: 7px;
+    height: 7px;
   }
 
   .hero {
-    padding: 96px 16px 84px;
+    padding: 88px 16px 76px;
   }
 
   .hero-lockup {
-    display: block;
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .hero-text {
+    display: contents;
   }
 
   .hero-icon {
-    width: 82px;
-    height: 82px;
-    margin-bottom: 18px;
-    border-radius: 18px;
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    width: 58px;
+    height: 58px;
+    border-radius: 13px;
+  }
+
+  .eyebrow {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    margin: 0;
+    font-size: clamp(8px, 2.1vw, 10px);
   }
 
   h1 {
-    font-size: 40px;
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+    font-size: clamp(26px, 7.5vw, 36px);
+    margin-bottom: 14px;
+  }
+
+  .lede {
+    grid-column: 1 / -1;
+    grid-row: 3;
   }
 
   h2 {
@@ -828,13 +914,22 @@ h3 {
   }
 
   .theme-dock {
-    display: grid;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 10px;
+    min-width: 0;
+  }
+
+  .theme-switcher {
+    padding-right: 4px;
   }
 
   .theme-labels {
+    flex: 0 0 auto;
     font-size: 11px;
-    white-space: normal;
+    text-align: right;
+    white-space: nowrap;
   }
 
   .btn {
@@ -858,5 +953,32 @@ h3 {
 
   .footer {
     padding-inline: 16px;
+  }
+}
+
+@media (max-width: 380px) {
+  .theme-dock {
+    gap: 8px;
+  }
+
+  .theme-switcher {
+    gap: 5px;
+    padding-right: 0;
+  }
+
+  .theme-dot {
+    width: 32px;
+    height: 26px;
+    padding: 5px;
+    gap: 3px;
+  }
+
+  .theme-dot span:not(.sr-only) {
+    width: 6px;
+    height: 6px;
+  }
+
+  .theme-labels {
+    font-size: 10px;
   }
 }
