@@ -88,7 +88,7 @@ function setTheme(id, options = {}) {
     window.setTimeout(() => {
       swapScreenshots();
       if (themeName) {
-        themeName.textContent = `${theme.label} theme`;
+        themeName.textContent = theme.label;
       }
       window.requestAnimationFrame(() => screenshotCard?.classList.remove('is-fading'));
       window.requestAnimationFrame(() => themeName?.classList.remove('is-fading'));
@@ -96,7 +96,7 @@ function setTheme(id, options = {}) {
   } else {
     swapScreenshots();
     if (themeName) {
-      themeName.textContent = `${theme.label} theme`;
+      themeName.textContent = theme.label;
     }
   }
 }
