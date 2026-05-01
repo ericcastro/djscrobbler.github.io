@@ -1,0 +1,215 @@
+---
+import '../styles/global.css';
+import themeScriptUrl from '../scripts/theme.js?url';
+
+const themes = [
+  {
+    id: 'neon-night',
+    label: 'Neon Night',
+    icon: '/assets/dj-scrobbler-icon-neon-night.svg',
+    screenshot: '/assets/screenshot-neon-night.png',
+    colors: ['#ff4fd8', '#00c2ff', '#faff70'],
+  },
+  {
+    id: 'signal-teal',
+    label: 'Signal Teal',
+    icon: '/assets/dj-scrobbler-icon-signal-teal.svg',
+    screenshot: '/assets/screenshot-signal-teal.png',
+    colors: ['#2dd4bf', '#6ee7b7', '#ffe66d'],
+  },
+  {
+    id: 'sunset-deck',
+    label: 'Sunset Deck',
+    icon: '/assets/dj-scrobbler-icon-sunset-deck.svg',
+    screenshot: '/assets/screenshot-sunset-deck.png',
+    colors: ['#f05d5e', '#ff8a5b', '#ffbf3f'],
+  },
+];
+
+const repoUrl = 'https://github.com/ericcastro/dj-scrobbler';
+const releasesUrl = 'https://github.com/ericcastro/dj-scrobbler/releases/latest';
+---
+
+<!doctype html>
+<html lang="en" data-theme="neon-night">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="DJ Scrobbler lets you search, bookmark, and scrobble individual tracks inside DJ sets from YouTube and SoundCloud." />
+    <meta property="og:title" content="DJ Scrobbler" />
+    <meta property="og:description" content="Scrobble individual tracks from DJ sets on YouTube and SoundCloud." />
+    <meta property="og:image" content="/assets/screenshot-neon-night.png" />
+    <meta name="theme-color" content="#0c1220" />
+    <link rel="icon" href="/assets/dj-scrobbler-icon-neon-night.svg" />
+    <title>DJ Scrobbler - A music app for DJ set lovers, who want precise listening history</title>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar" aria-label="Site navigation">
+        <a class="brand" href="/" aria-label="DJ Scrobbler home">
+          <span>DJ Scrobbler</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="#download">Download</a>
+          <a href="#lastfm">About</a>
+          <a href={repoUrl}>GitHub</a>
+        </nav>
+      </header>
+
+      <section class="hero" aria-labelledby="hero-title">
+        <picture class="hero-bg">
+          <img
+            src="/assets/screenshot-neon-night.png"
+            alt=""
+            width="1924"
+            height="1582"
+            decoding="async"
+            data-theme-screenshot
+          />
+        </picture>
+
+        <div class="hero-copy">
+          <div class="hero-lockup">
+            <img
+              class="hero-icon"
+              src="/assets/dj-scrobbler-icon-neon-night.svg"
+              alt="DJ Scrobbler Neon Night app icon"
+              width="176"
+              height="176"
+              data-theme-icon
+            />
+            <div class="hero-text">
+              <p class="eyebrow">A music app for DJ set lovers, who want precise listening history</p>
+              <h1 id="hero-title">DJ Scrobbler</h1>
+              <p class="lede">
+                Scrobble individual tracks to your Last.fm account as they get played by your favorite DJs in YouTube or SoundCloud.
+              </p>
+            </div>
+          </div>
+          <div class="hero-actions" aria-label="Primary actions">
+            <a class="btn btn-primary" href={releasesUrl} data-release-button>
+              <span data-download-label>Download latest release</span>
+            </a>
+            <a class="btn btn-secondary" href={repoUrl}>View source</a>
+          </div>
+        </div>
+
+        <div class="screenshot-stage" data-theme-stage>
+          <figure class="screenshot-card" aria-label="DJ Scrobbler desktop app screenshot">
+            <div class="window-strip" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+            <img
+              src="/assets/screenshot-neon-night.png"
+              alt="DJ Scrobbler desktop app in the Neon Night theme"
+              width="1924"
+              height="1582"
+              loading="eager"
+              data-theme-screenshot
+              data-theme-screenshot-alt
+            />
+          </figure>
+
+          <div class="theme-dock" aria-label="Theme preview controls">
+            <div class="theme-switcher" aria-label="Theme switcher">
+              {themes.map((theme) => (
+                <button
+                  class="theme-dot"
+                  type="button"
+                  data-theme-option={theme.id}
+                  aria-label={`Switch to ${theme.label}`}
+                  aria-pressed={theme.id === 'neon-night' ? 'true' : 'false'}
+                >
+                  <span class="sr-only">{theme.label}</span>
+                  {theme.colors.map((color) => <span style={`--dot-color: ${color}`}></span>)}
+                </button>
+              ))}
+            </div>
+            <div class="theme-labels" aria-live="polite" aria-label="Current app theme">
+              <span data-theme-name>Neon Night theme</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="feature-band" aria-labelledby="why-title">
+        <div class="section-heading">
+          <p class="eyebrow">Ditch your web browser</p>
+          <h2 id="why-title">Standalone  desktop app for DJ sets</h2>
+        </div>
+        <div class="feature-grid">
+          <article>
+            <h3>Search</h3>
+            <p>Jump into YouTube or SoundCloud and find your favorite DJ mixes, or explore thousands others readily available</p>
+          </article>
+          <article>
+            <h3>Scrobble</h3>
+            <p>Connect Last.fm and scrobble individual tracks inside a set, instead of flattening an hour of music into one play.</p>
+          </article>
+          <article>
+            <h3>Favorite</h3>
+            <p>Save your favorite DJ sets so you can come back to them easily later.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="app-band" id="download" aria-labelledby="download-title">
+        <div class="app-copy">
+          <p class="eyebrow">Open source, multiplatform... and built with AI</p>
+          <h2 id="download-title">Wait... was it vibe-coded?</h2>
+          <p>
+            Yes, but by a 20+ years experienced software developer with not enough time in his hands to get side projects like these to the finish line on his own. 
+            <br /><br />
+          </p>
+          <p>But for this reason it's also free and open source. And built with Electron, so it works in all desktop platforms.</p>
+        </div>
+        <div class="download-panel">
+          <a class="download-row" href={releasesUrl}>
+            <span>Latest release</span>
+            <strong data-download-label>Download latest release</strong>
+          </a>
+          <a class="download-row" href={`${repoUrl}/releases`}>
+            <span>Platforms supported</span>
+            <strong>macOS, Windows, Linux</strong>
+          </a>
+          <a class="download-row" href={repoUrl}>
+            <span>GitHub Repository</span>
+            <strong>github.com/ericcastro/dj-scrobbler</strong>
+          </a>
+        </div>
+      </section>
+
+      <section class="lastfm-band" id="lastfm" aria-labelledby="lastfm-title">
+        <div class="lastfm-mark">
+          <img src="/assets/last-fm.svg" alt="Last.fm" width="168" height="64" loading="lazy" />
+          <img src="/assets/as.svg" alt="Audioscrobbler" width="168" height="64" loading="lazy" />
+        </div>
+        <div class="lastfm-copy">
+          <p class="eyebrow">The missing listening history</p>
+          <h2 id="lastfm-title">A love letter to Last.fm</h2>
+          <p>
+            ... and  and 1001tracklists.com<br /><br />
+          </p>
+          <p>
+            I made this project to fill in the gap that streaming platforms left by never caring about the tracklist in DJ sets.<br /><br />
+          </p>
+          <p>But thanks to websites like 1001tracklists, we can revive the old days of scrobbling DJ set from CUE sheets in Winamp - a common practice for hours long mp3 files, that we were left with no alternative since.<br /><br />
+          </p>
+          <p>
+          So this is what I came up with as a proud 20 years plus user of what I strongly believe is the best and most useful social media platform created, one that stayed true to its core.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>DJ Scrobbler</span>
+      <span>Open source multiplatform DJ set music app</span>
+      <span>&copy; <span data-year>2026</span> Eric Castro - All rights reserved.</span>
+      
+    </footer>
+
+    <script type="module" src={themeScriptUrl}></script>
+  </body>
+</html>
