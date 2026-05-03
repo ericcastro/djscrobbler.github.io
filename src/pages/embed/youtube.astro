@@ -1,0 +1,170 @@
+---
+const pageTitle = 'DJ Scrobbler YouTube Embed';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{pageTitle}</title>
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #05070d;
+        --panel: #0c1220;
+        --border: #253460;
+        --text: #e7f7ff;
+        --muted: #8aa4d2;
+        --accent: #00c2ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        color: var(--text);
+        background: var(--bg);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+
+      body {
+        display: grid;
+        place-items: stretch;
+      }
+
+      iframe {
+        width: 100%;
+        height: 100%;
+        display: block;
+        border: 0;
+        background: #000;
+      }
+
+      .empty-state {
+        min-height: 100%;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        text-align: center;
+        background:
+          linear-gradient(90deg, color-mix(in srgb, var(--border) 18%, transparent) 1px, transparent 1px),
+          linear-gradient(180deg, color-mix(in srgb, var(--border) 14%, transparent) 1px, transparent 1px),
+          var(--panel);
+        background-size: 48px 48px;
+      }
+
+      .empty-state div {
+        width: min(520px, 100%);
+        padding: 22px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--panel) 86%, transparent);
+      }
+
+      .empty-state strong {
+        display: block;
+        margin-bottom: 10px;
+        color: var(--text);
+        font-size: 16px;
+      }
+
+      .empty-state code,
+      .empty-state p {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .empty-state code {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <main id="player-root" class="empty-state">
+      <div>
+        <strong>Missing YouTube video ID</strong>
+        <p>Load this page with <code>?id=VIDEO_ID</code>, for example <code>/embed/youtube?id=dQw4w9WgXcQ</code>.</p>
+      </div>
+    </main>
+
+    <script is:inline>
+      const root = document.getElementById('player-root');
+      const params = new URLSearchParams(window.location.search);
+
+      function parseTimestamp(value) {
+        if (!value) return '';
+        if (/^\d+$/.test(value)) return value;
+
+        const match = value.match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?$/i);
+        if (!match) return '';
+
+        const hours = Number(match[1] || 0);
+        const minutes = Number(match[2] || 0);
+        const seconds = Number(match[3] || 0);
+        const total = hours * 3600 + minutes * 60 + seconds;
+        return total > 0 ? String(total) : '';
+      }
+
+      function extractVideoId() {
+        const directId = params.get('id') || params.get('v') || params.get('videoId');
+        if (directId) return directId;
+
+        const rawUrl = params.get('url');
+        if (!rawUrl) return '';
+
+        try {
+          const url = new URL(rawUrl);
+          if (url.hostname === 'youtu.be') return url.pathname.split('/').filter(Boolean)[0] || '';
+          if (url.hostname.endsWith('youtube.com')) {
+            return url.searchParams.get('v') || url.pathname.split('/').filter(Boolean).pop() || '';
+          }
+        } catch {}
+
+        return '';
+      }
+
+      function renderError(message) {
+        root.className = 'empty-state';
+        root.innerHTML = `<div><strong>${message}</strong><p>Expected a YouTube video ID in <code>?id=...</code>.</p></div>`;
+      }
+
+      const videoId = extractVideoId();
+      const isValidVideoId = /^[a-zA-Z0-9_-]{6,32}$/.test(videoId);
+
+      if (!isValidVideoId) {
+        renderError(videoId ? 'Invalid YouTube video ID' : 'Missing YouTube video ID');
+      } else {
+        const embedParams = new URLSearchParams({
+          autoplay: params.get('autoplay') || '1',
+          controls: params.get('controls') || '1',
+          enablejsapi: '1',
+          playsinline: '1',
+          rel: '0',
+          origin: window.location.origin,
+        });
+
+        const start = parseTimestamp(params.get('start') || params.get('t'));
+        if (start) embedParams.set('start', start);
+
+        const iframe = document.createElement('iframe');
+        iframe.title = 'YouTube video player';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        iframe.allowFullscreen = true;
+        iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+        iframe.src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?${embedParams}`;
+
+        root.className = '';
+        root.replaceChildren(iframe);
+      }
+    </script>
+  </body>
+</html>

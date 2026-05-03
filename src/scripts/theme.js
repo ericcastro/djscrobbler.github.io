@@ -27,21 +27,119 @@ const themeName = document.querySelector('[data-theme-name]');
 const screenshotCard = document.querySelector('.screenshot-card');
 const screenshotStage = document.querySelector('[data-theme-stage]');
 const releaseButton = document.querySelector('[data-release-button]');
+const downloadLinks = Array.from(document.querySelectorAll('[data-download-link]'));
 const downloadLabels = Array.from(document.querySelectorAll('[data-download-label]'));
 const year = document.querySelector('[data-year]');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fallbackReleaseUrl = 'https://github.com/ericcastro/dj-scrobbler/releases/latest';
+const latestReleaseApiUrl = 'https://api.github.com/repos/ericcastro/dj-scrobbler/releases/latest';
 
 let currentThemeId = 'neon-night';
 let cycleTimer = null;
 let isScreenshotVisible = false;
 
-function platformName() {
+function platformInfo() {
   const platform = navigator.userAgentData?.platform || navigator.platform || '';
   const value = platform.toLowerCase();
-  if (value.includes('mac')) return 'macOS';
-  if (value.includes('win')) return 'Windows';
-  if (value.includes('linux')) return 'Linux';
-  return 'your platform';
+  if (value.includes('mac')) return { id: 'macos', label: 'macOS' };
+  if (value.includes('win')) return { id: 'windows', label: 'Windows' };
+  if (value.includes('linux')) return { id: 'linux', label: 'Linux' };
+  return { id: 'unknown', label: 'your platform' };
+}
+
+async function platformArch() {
+  if (!navigator.userAgentData?.getHighEntropyValues) return '';
+
+  try {
+    const values = await navigator.userAgentData.getHighEntropyValues(['architecture', 'bitness']);
+    return `${values.architecture || ''} ${values.bitness || ''}`.toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
+function isReleaseAsset(asset) {
+  const name = asset.name.toLowerCase();
+  return !name.endsWith('.blockmap') && !name.endsWith('.yml') && !name.endsWith('.yaml') && !name.endsWith('.json');
+}
+
+function assetScore(asset, platform, arch) {
+  const name = asset.name.toLowerCase();
+  let score = 0;
+
+  if (!isReleaseAsset(asset)) return -1;
+
+  if (platform === 'macos') {
+    if (name.endsWith('.dmg')) score += 80;
+    if (name.endsWith('.zip')) score += 35;
+    if (name.includes('mac') || name.includes('darwin') || name.endsWith('.dmg')) score += 20;
+    if (arch.includes('arm') && (name.includes('arm64') || name.includes('aarch64'))) score += 30;
+    if (!arch.includes('arm') && (name.includes('x64') || name.includes('x86_64') || name.includes('amd64'))) score += 20;
+    if (!name.includes('arm64') && !name.includes('x64') && !name.includes('x86_64') && !name.includes('amd64')) score += 8;
+  }
+
+  if (platform === 'windows') {
+    if (name.endsWith('.exe')) score += 80;
+    if (name.includes('setup')) score += 30;
+    if (name.includes('win') || name.includes('windows')) score += 18;
+    if (name.includes('portable')) score += 10;
+  }
+
+  if (platform === 'linux') {
+    if (name.endsWith('.appimage')) score += 90;
+    if (name.endsWith('.deb')) score += 55;
+    if (name.includes('linux')) score += 20;
+    if (name.includes('x86_64') || name.includes('amd64')) score += 10;
+  }
+
+  return score;
+}
+
+function chooseDownloadAsset(assets, platform, arch) {
+  const candidates = assets
+    .map((asset) => ({ asset, score: assetScore(asset, platform, arch) }))
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score);
+
+  return candidates[0]?.asset || null;
+}
+
+async function resolveDownloadUrl(platform) {
+  if (platform.id === 'unknown') return fallbackReleaseUrl;
+
+  try {
+    const [releaseResponse, arch] = await Promise.all([
+      fetch(latestReleaseApiUrl, {
+        headers: { Accept: 'application/vnd.github+json' },
+      }),
+      platformArch(),
+    ]);
+
+    if (!releaseResponse.ok) return fallbackReleaseUrl;
+
+    const release = await releaseResponse.json();
+    const asset = chooseDownloadAsset(release.assets || [], platform.id, arch);
+    return asset?.browser_download_url || release.html_url || fallbackReleaseUrl;
+  } catch {
+    return fallbackReleaseUrl;
+  }
+}
+
+async function updateDownloadLinks() {
+  const platform = platformInfo();
+
+  downloadLabels.forEach((downloadLabel) => {
+    downloadLabel.textContent = `Download for ${platform.label}`;
+  });
+
+  if (releaseButton) {
+    releaseButton.setAttribute('aria-label', `Download the latest DJ Scrobbler release for ${platform.label}`);
+  }
+
+  const downloadUrl = await resolveDownloadUrl(platform);
+  downloadLinks.forEach((downloadLink) => {
+    downloadLink.href = downloadUrl;
+  });
 }
 
 function setTheme(id, options = {}) {
@@ -149,13 +247,7 @@ if ('IntersectionObserver' in window && screenshotStage) {
   startThemeCycle();
 }
 
-downloadLabels.forEach((downloadLabel) => {
-  downloadLabel.textContent = `Download for ${platformName()}`;
-});
-
-if (releaseButton) {
-  releaseButton.setAttribute('aria-label', `Open the latest DJ Scrobbler release for ${platformName()}`);
-}
+updateDownloadLinks();
 
 if (year) {
   year.textContent = String(new Date().getFullYear());

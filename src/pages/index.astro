@@ -28,6 +28,7 @@ const themes = [
 
 const repoUrl = 'https://github.com/ericcastro/dj-scrobbler';
 const releasesUrl = 'https://github.com/ericcastro/dj-scrobbler/releases/latest';
+const allReleasesUrl = 'https://github.com/ericcastro/dj-scrobbler/releases';
 ---
 
 <!doctype html>
@@ -83,16 +84,22 @@ const releasesUrl = 'https://github.com/ericcastro/dj-scrobbler/releases/latest'
               <p class="eyebrow">A music app for DJ set lovers, who want precise listening history</p>
               <h1 id="hero-title">DJ Scrobbler</h1>
               <p class="lede">
-                Scrobble individual tracks to your Last.fm account as they get played by your favorite DJs in YouTube or SoundCloud.
+                Search and organize your favorite DJ sets in a clutter-free design and scrobble<span>(*)</span> individual tracks to your Last.fm account as they play.
               </p>
             </div>
           </div>
           <div class="hero-actions" aria-label="Primary actions">
-            <a class="btn btn-primary" href={releasesUrl} data-release-button>
+            <a class="btn btn-primary" href={releasesUrl} data-download-link data-release-button>
               <span data-download-label>Download latest release</span>
             </a>
             <a class="btn btn-secondary" href={repoUrl}>View source</a>
           </div>
+          <aside class="scrobble-definition" aria-label="Definition of scrobble">
+            <strong><span>* </span>scrobble <span>(verb)</span></strong>
+            <p>
+              <em>to publish one's media consumption habits to the internet via software, in order to track when and how often certain items are played.</em>
+            </p>
+          </aside>
         </div>
 
         <div class="screenshot-stage" data-theme-stage>
@@ -165,11 +172,11 @@ const releasesUrl = 'https://github.com/ericcastro/dj-scrobbler/releases/latest'
           <p>But for this reason it's also free and open source. And built with Electron, so it works in all desktop platforms.</p>
         </div>
         <div class="download-panel">
-          <a class="download-row" href={releasesUrl}>
+          <a class="download-row" href={releasesUrl} data-download-link>
             <span>Latest release</span>
             <strong data-download-label>Download latest release</strong>
           </a>
-          <a class="download-row" href={`${repoUrl}/releases`}>
+          <a class="download-row" href={allReleasesUrl}>
             <span>Platforms supported</span>
             <strong>macOS, Windows, Linux</strong>
           </a>

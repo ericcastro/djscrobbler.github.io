@@ -165,7 +165,6 @@ button {
   padding: 7px 11px;
   border-radius: 6px;
   color: var(--text2);
-  font-size: 12px;
   transition: color 150ms ease, background 150ms ease;
 }
 
@@ -287,6 +286,7 @@ button {
 
 .hero-text {
   min-width: 0;
+  padding-right: 70px;
 }
 
 .eyebrow {
@@ -341,6 +341,38 @@ h3 {
   flex-wrap: wrap;
   gap: 10px;
   margin-left: 206px;
+}
+
+.lede span {
+  color: color-mix(in srgb, var(--text2) 78%, transparent);
+  font-size: 40%;
+  vertical-align: super;
+}
+
+.scrobble-definition {
+  width: min(610px, calc(100% - 206px));
+  margin: 18px 0 0 206px;
+  color: color-mix(in srgb, var(--text2) 82%, transparent);
+  font-size: 11px;
+  line-height: 1.5;
+  margin-top: 40px;
+}
+
+.scrobble-definition strong {
+  display: block;
+  margin-bottom: 4px;
+  color: color-mix(in srgb, var(--text) 72%, var(--text2));
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.scrobble-definition strong span {
+  color: var(--text2);
+  font-weight: 620;
+}
+
+.scrobble-definition p {
+  margin-bottom: 0;
 }
 
 .btn {
@@ -641,6 +673,11 @@ h3 {
     margin-left: 170px;
   }
 
+  .scrobble-definition {
+    width: min(560px, calc(100% - 170px));
+    margin-left: 170px;
+  }
+
   .screenshot-stage {
     width: min(39vw, 600px);
   }
@@ -677,6 +714,11 @@ h3 {
   }
 
   .hero-actions {
+    margin-left: 140px;
+  }
+
+  .scrobble-definition {
+    width: min(560px, calc(100% - 140px));
     margin-left: 140px;
   }
 
@@ -742,6 +784,11 @@ h3 {
     margin-left: 114px;
   }
 
+  .scrobble-definition {
+    width: min(520px, calc(100% - 114px));
+    margin-left: 114px;
+  }
+
   h1 {
     font-size: 46px;
   }
@@ -771,16 +818,16 @@ h3 {
 
   .hero-lockup {
     display: grid;
-    grid-template-columns: 76px minmax(0, 1fr);
+    grid-template-columns: 84px minmax(0, 1fr);
     align-items: start;
     gap: 16px;
   }
 
   .hero-icon {
-    width: 76px;
-    height: 76px;
+    width: 84px;
+    height: 84px;
     border-radius: 16px;
-    margin-top: 0;
+    margin-top: 4px;
   }
 
   h1 {
@@ -799,6 +846,11 @@ h3 {
   }
 
   .hero-actions {
+    margin-left: 0;
+  }
+
+  .scrobble-definition {
+    width: min(560px, 100%);
     margin-left: 0;
   }
 }
@@ -849,7 +901,7 @@ h3 {
     width: 36px;
     height: 28px;
     padding: 5px;
-    gap: 4px;
+    gap: 2px;
   }
 
   .theme-dot span:not(.sr-only) {
@@ -862,7 +914,7 @@ h3 {
   }
 
   .hero-lockup {
-    grid-template-columns: 58px minmax(0, 1fr);
+    grid-template-columns: 84px minmax(0, 1fr);
     gap: 12px;
   }
 
@@ -873,9 +925,10 @@ h3 {
   .hero-icon {
     grid-column: 1;
     grid-row: 1 / span 2;
-    width: 58px;
-    height: 58px;
+    width: 84px;
+    height: 84px;
     border-radius: 13px;
+    margin-top: -4px;
   }
 
   .eyebrow {
@@ -883,14 +936,14 @@ h3 {
     grid-row: 1;
     align-self: end;
     margin: 0;
-    font-size: clamp(8px, 2.1vw, 10px);
+    font-size: clamp(6px, 1.6vw, 8px);
   }
 
   h1 {
     grid-column: 2;
     grid-row: 2;
     align-self: start;
-    font-size: clamp(26px, 7.5vw, 36px);
+    font-size: clamp(46px, 9.7vw, 56px);
     margin-bottom: 14px;
   }
 
@@ -907,6 +960,11 @@ h3 {
     display: grid;
     grid-template-columns: 1fr;
     margin-left: 0;
+  }
+
+  .scrobble-definition {
+    margin-top: 16px;
+    font-size: 10px;
   }
 
   .screenshot-stage {
