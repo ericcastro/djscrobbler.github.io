@@ -156,6 +156,7 @@ const pageTitle = 'DJ Scrobbler YouTube Embed';
         if (start) embedParams.set('start', start);
 
         const iframe = document.createElement('iframe');
+        iframe.id = 'yt-iframe';
         iframe.title = 'YouTube video player';
         iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
         iframe.allowFullscreen = true;
@@ -164,6 +165,17 @@ const pageTitle = 'DJ Scrobbler YouTube Embed';
 
         root.className = '';
         root.replaceChildren(iframe);
+
+        // Load the YouTube IFrame API and expose window.ytPlayer so DJ Scrobbler
+        // can call playVideo / pauseVideo / getPlayerState / getCurrentTime / getDuration.
+        const apiScript = document.createElement('script');
+        apiScript.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(apiScript);
+
+        window.onYouTubeIframeAPIReady = function () {
+          // Wrap the already-rendered iframe — no reload, just API access.
+          window.ytPlayer = new YT.Player('yt-iframe');
+        };
       }
     </script>
   </body>
