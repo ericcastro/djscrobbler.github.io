@@ -173,8 +173,15 @@ const pageTitle = 'DJ Scrobbler YouTube Embed';
         document.head.appendChild(apiScript);
 
         window.onYouTubeIframeAPIReady = function () {
-          // Wrap the already-rendered iframe — no reload, just API access.
-          window.ytPlayer = new YT.Player('yt-iframe');
+          // Wrap the already-rendered iframe. Only expose window.ytPlayer after
+          // onReady fires — before that, seekTo / playVideo are silently ignored.
+          const player = new YT.Player('yt-iframe', {
+            events: {
+              onReady: function () {
+                window.ytPlayer = player;
+              }
+            }
+          });
         };
       }
     </script>
