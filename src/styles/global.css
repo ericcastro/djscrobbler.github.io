@@ -343,9 +343,10 @@ h3 {
   margin-left: 206px;
 }
 
-.lede span {
+.scrobble-marker {
   color: color-mix(in srgb, var(--text2) 78%, transparent);
   font-size: 40%;
+  font-weight: 620;
   vertical-align: super;
 }
 
@@ -366,7 +367,7 @@ h3 {
   font-weight: 760;
 }
 
-.scrobble-definition strong span {
+.scrobble-definition strong span:not(.scrobble-marker) {
   color: var(--text2);
   font-weight: 620;
 }
