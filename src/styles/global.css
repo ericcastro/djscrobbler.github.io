@@ -372,6 +372,10 @@ h3 {
   font-weight: 620;
 }
 
+.scrobble-definition .scrobble-marker {
+  font-size: 64%;
+}
+
 .scrobble-definition p {
   margin-bottom: 0;
 }
