@@ -29,19 +29,38 @@ const screenshotStage = document.querySelector('[data-theme-stage]');
 const releaseButton = document.querySelector('[data-release-button]');
 const downloadLinks = Array.from(document.querySelectorAll('[data-download-link]'));
 const downloadLabels = Array.from(document.querySelectorAll('[data-download-label]'));
+const downloadModal = document.querySelector('[data-download-modal]');
+const downloadModalTitle = document.querySelector('[data-download-modal-title]');
+const downloadBuildNote = document.querySelector('[data-download-build-note]');
+const downloadBuildText = document.querySelector('[data-download-build-text]');
+const downloadWhyTooltip = document.querySelector('[data-download-why-tooltip]');
+const downloadModalSummary = document.querySelector('[data-download-modal-summary]');
+const downloadSteps = document.querySelector('[data-download-steps]');
+const downloadShot = document.querySelector('[data-download-shot]');
+const downloadShotImage = document.querySelector('[data-download-shot-image]');
+const downloadShotLabel = document.querySelector('[data-download-shot-label]');
+const downloadCountdownWrap = document.querySelector('[data-download-countdown-wrap]');
+const downloadCountdown = document.querySelector('[data-download-countdown]');
+const downloadStarted = document.querySelector('[data-download-started]');
+const downloadManual = document.querySelector('[data-download-manual]');
+const downloadClose = document.querySelector('[data-download-close]');
 const year = document.querySelector('[data-year]');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const fallbackReleaseUrl = 'https://github.com/ericcastro/dj-scrobbler/releases/latest';
-const latestReleaseApiUrl = 'https://api.github.com/repos/ericcastro/dj-scrobbler/releases/latest';
+const releasesUrl = 'https://github.com/ericcastro/dj-scrobbler/releases';
+const releasesApiUrl = 'https://api.github.com/repos/ericcastro/dj-scrobbler/releases?per_page=10';
+const quarantineHelpText =
+  'This removes Apple\'s quarantine flag from DJ Scrobbler.app. macOS adds that flag to apps downloaded outside the App Store or from an unidentified developer. Removing it lets the app open after you decide you trust this official GitHub download.';
 
 let currentThemeId = 'neon-night';
 let cycleTimer = null;
 let isScreenshotVisible = false;
+let downloadInfoPromise = null;
+let countdownTimer = null;
 
-function platformInfo() {
+function basePlatformInfo() {
   const platform = navigator.userAgentData?.platform || navigator.platform || '';
   const value = platform.toLowerCase();
-  if (value.includes('mac')) return { id: 'macos', label: 'macOS' };
+  if (value.includes('mac')) return { id: 'macos', label: 'macOS', arch: 'unknown' };
   if (value.includes('win')) return { id: 'windows', label: 'Windows' };
   if (value.includes('linux')) return { id: 'linux', label: 'Linux' };
   return { id: 'unknown', label: 'your platform' };
@@ -58,34 +77,83 @@ async function platformArch() {
   }
 }
 
+function webglRenderer() {
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    const info = gl?.getExtension('WEBGL_debug_renderer_info');
+    if (!gl || !info) return '';
+    return String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL) || '').toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
+function normalizeArch(value) {
+  const arch = value.toLowerCase();
+  if (arch.includes('arm') || arch.includes('aarch')) return 'arm64';
+  if (arch.includes('x86') || arch.includes('x64') || arch.includes('amd64') || arch.includes('intel')) return 'x64';
+  return 'unknown';
+}
+
+async function detectedPlatform() {
+  const platform = basePlatformInfo();
+  if (platform.id !== 'macos') return platform;
+
+  let arch = normalizeArch(await platformArch());
+  if (arch === 'unknown') {
+    const renderer = webglRenderer();
+    if (renderer.includes('apple') && !renderer.includes('intel') && !renderer.includes('amd') && !renderer.includes('radeon')) {
+      arch = 'arm64';
+    } else if (renderer.includes('intel') || renderer.includes('amd') || renderer.includes('radeon')) {
+      arch = 'x64';
+    }
+  }
+
+  if (arch === 'arm64') return { ...platform, arch, label: 'macOS (Apple Silicon)' };
+  if (arch === 'x64') return { ...platform, arch, label: 'macOS (Intel)' };
+  return platform;
+}
+
 function isReleaseAsset(asset) {
   const name = asset.name.toLowerCase();
   return !name.endsWith('.blockmap') && !name.endsWith('.yml') && !name.endsWith('.yaml') && !name.endsWith('.json');
 }
 
-function assetScore(asset, platform, arch) {
+function assetScore(asset, platform) {
   const name = asset.name.toLowerCase();
   let score = 0;
 
   if (!isReleaseAsset(asset)) return -1;
 
-  if (platform === 'macos') {
-    if (name.endsWith('.dmg')) score += 80;
-    if (name.endsWith('.zip')) score += 35;
+  if (platform.id === 'macos') {
+    const isArm = name.includes('arm64') || name.includes('aarch64');
+    const isArchive = name.endsWith('.zip');
+
+    if (name.endsWith('.dmg')) score += 100;
+    if (isArchive) score += 35;
     if (name.includes('mac') || name.includes('darwin') || name.endsWith('.dmg')) score += 20;
-    if (arch.includes('arm') && (name.includes('arm64') || name.includes('aarch64'))) score += 30;
-    if (!arch.includes('arm') && (name.includes('x64') || name.includes('x86_64') || name.includes('amd64'))) score += 20;
-    if (!name.includes('arm64') && !name.includes('x64') && !name.includes('x86_64') && !name.includes('amd64')) score += 8;
+
+    if (platform.arch === 'arm64') {
+      if (isArm) score += 70;
+      if (!isArm && !isArchive) score -= 25;
+    } else if (platform.arch === 'x64') {
+      if (isArm) score -= 120;
+      if (!isArm) score += 50;
+    } else {
+      if (!isArm && !isArchive) score += 20;
+      if (isArm) score += 8;
+    }
   }
 
-  if (platform === 'windows') {
+  if (platform.id === 'windows') {
     if (name.endsWith('.exe')) score += 80;
-    if (name.includes('setup')) score += 30;
+    if (name.includes('setup')) score += 50;
     if (name.includes('win') || name.includes('windows')) score += 18;
-    if (name.includes('portable')) score += 10;
+    if (name.includes('portable')) score -= 10;
   }
 
-  if (platform === 'linux') {
+  if (platform.id === 'linux') {
     if (name.endsWith('.appimage')) score += 90;
     if (name.endsWith('.deb')) score += 55;
     if (name.includes('linux')) score += 20;
@@ -95,51 +163,278 @@ function assetScore(asset, platform, arch) {
   return score;
 }
 
-function chooseDownloadAsset(assets, platform, arch) {
+function chooseDownloadAsset(assets, platform) {
   const candidates = assets
-    .map((asset) => ({ asset, score: assetScore(asset, platform, arch) }))
+    .map((asset) => ({ asset, score: assetScore(asset, platform) }))
     .filter((item) => item.score > 0)
     .sort((a, b) => b.score - a.score);
 
   return candidates[0]?.asset || null;
 }
 
-async function resolveDownloadUrl(platform) {
-  if (platform.id === 'unknown') return fallbackReleaseUrl;
-
-  try {
-    const [releaseResponse, arch] = await Promise.all([
-      fetch(latestReleaseApiUrl, {
-        headers: { Accept: 'application/vnd.github+json' },
-      }),
-      platformArch(),
-    ]);
-
-    if (!releaseResponse.ok) return fallbackReleaseUrl;
-
-    const release = await releaseResponse.json();
-    const asset = chooseDownloadAsset(release.assets || [], platform.id, arch);
-    return asset?.browser_download_url || release.html_url || fallbackReleaseUrl;
-  } catch {
-    return fallbackReleaseUrl;
+function installCopy(platform) {
+  if (platform.id === 'macos') {
+    return {
+      title: 'Installation Notes',
+      summary: 'Until DJ Scrobbler gets listed in the App Store, a few extra steps are required',
+      steps: [        
+        'Open the .dmg file, and copy DJ Scrobbler.app to Applications.',
+        'If you try running the app and see the above warning, press Cancel.',
+        'Open macOS app "Terminal" (Press Command-Space, type Terminal, then press Enter).',
+        'In the Terminal window, paste this command and press Enter: xattr -dr com.apple.quarantine "/Applications/DJ Scrobbler.app"',
+        'Open DJ Scrobbler again from Applications.',
+      ],
+      note: 'DJ Scrobbler is in public beta and is distributed directly from GitHub. Until it is notarized or listed in the App Store, macOS will purposely mislead you into believing that the app is "damaged", when in reality, they just want you to install in your system only what Apple allows you to.',
+      shot: {
+        src: '/assets/macos-damaged-warning.png',
+        alt: 'macOS warning saying DJ Scrobbler.app is damaged and cannot be opened.',
+        label: 'If this appears, choose Cancel. Do not move the app to the Bin.',
+      },
+    };
   }
+
+  if (platform.id === 'windows') {
+    return {
+      title: 'Download is starting...',
+      summary: 'DJ Scrobbler is a public beta. Because the app is new and unsigned, Microsoft Defender SmartScreen may show a warning.',
+      steps: [
+        'Run the downloaded Setup file.',
+        'If SmartScreen appears, click More info.',
+        'Click Run anyway, then finish the installer.',
+      ],
+      note: 'Windows may warn about new open-source apps until they build reputation or use paid code signing. Only continue when the file came from the official DJ Scrobbler GitHub release.',
+      shot: {
+        label: 'Placeholder for the Windows SmartScreen / Run anyway screenshot.',
+      },
+    };
+  }
+
+  if (platform.id === 'linux') {
+    return {
+      title: 'Download is starting...',
+      summary: 'DJ Scrobbler is a public beta. The AppImage download should run without a package manager.',
+      steps: [
+        'Save the AppImage file.',
+        'Mark it as executable if your desktop asks.',
+        'Open the AppImage to launch DJ Scrobbler.',
+      ],
+      shot: {
+        label: 'Placeholder for a Linux executable-permission screenshot.',
+      },
+      note: 'Some Linux desktops ask you to mark downloaded AppImages as executable before opening them. This is normal for standalone app files.',
+    };
+  }
+
+  return {
+    title: 'Download is starting...',
+    summary: 'DJ Scrobbler is a public beta. Choose the file that matches your operating system on GitHub Releases.',
+    steps: [
+      'Open the latest release.',
+      'Download the file for your operating system.',
+      'Follow the install prompt for your platform.',
+    ],
+    shot: {
+      label: 'Placeholder for platform-specific setup screenshots.',
+    },
+    note: 'DJ Scrobbler is a public beta distributed through GitHub Releases, so your operating system may ask for extra confirmation before opening it.',
+  };
+}
+
+function createTooltipLink(label, text, className = '') {
+  const wrap = document.createElement('span');
+  wrap.className = ['download-tooltip', className].filter(Boolean).join(' ');
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = label;
+  const tooltip = document.createElement('span');
+  tooltip.setAttribute('role', 'tooltip');
+  tooltip.textContent = text;
+  wrap.append(button, tooltip);
+  return wrap;
+}
+
+function latestRelease(releases) {
+  return releases.find((release) => !release.draft) || null;
+}
+
+async function resolveDownloadInfo() {
+  if (downloadInfoPromise) return downloadInfoPromise;
+
+  downloadInfoPromise = (async () => {
+    const platform = await detectedPlatform();
+
+    if (platform.id === 'unknown') {
+      return {
+        platform,
+        url: releasesUrl,
+        fileName: 'Choose your platform on GitHub Releases',
+        releaseUrl: releasesUrl,
+        copy: installCopy(platform),
+      };
+    }
+
+    try {
+      const releaseResponse = await fetch(releasesApiUrl, {
+        headers: { Accept: 'application/vnd.github+json' },
+      });
+
+      if (!releaseResponse.ok) throw new Error('Could not load releases');
+
+      const releases = await releaseResponse.json();
+      const release = latestRelease(releases);
+      const asset = chooseDownloadAsset(release?.assets || [], platform);
+
+      return {
+        platform,
+        url: asset?.browser_download_url || release?.html_url || releasesUrl,
+        fileName: asset?.name || 'Choose your installer on GitHub Releases',
+        releaseUrl: release?.html_url || releasesUrl,
+        isPrerelease: Boolean(release?.prerelease),
+        copy: installCopy(platform),
+      };
+    } catch {
+      return {
+        platform,
+        url: releasesUrl,
+        fileName: 'Choose your installer on GitHub Releases',
+        releaseUrl: releasesUrl,
+        copy: installCopy(platform),
+      };
+    }
+  })();
+
+  return downloadInfoPromise;
 }
 
 async function updateDownloadLinks() {
-  const platform = platformInfo();
+  const info = await resolveDownloadInfo();
 
   downloadLabels.forEach((downloadLabel) => {
-    downloadLabel.textContent = `Download for ${platform.label}`;
+    downloadLabel.textContent = `Download for ${info.platform.label}`;
   });
 
   if (releaseButton) {
-    releaseButton.setAttribute('aria-label', `Download the latest DJ Scrobbler release for ${platform.label}`);
+    releaseButton.setAttribute('aria-label', `Download the latest DJ Scrobbler beta for ${info.platform.label}`);
   }
 
-  const downloadUrl = await resolveDownloadUrl(platform);
   downloadLinks.forEach((downloadLink) => {
-    downloadLink.href = downloadUrl;
+    downloadLink.href = info.url;
   });
+
+  if (downloadManual) downloadManual.href = info.url;
+}
+
+function triggerDownload(url) {
+  if (!url || url === releasesUrl) return;
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.rel = 'noopener noreferrer';
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
+function renderDownloadModal(info) {
+  const { copy } = info;
+
+  if (downloadModalTitle) downloadModalTitle.textContent = copy.title;
+  if (downloadBuildNote) {
+    downloadBuildNote.hidden = info.platform.id === 'unknown';
+  }
+  if (downloadBuildText) {
+    downloadBuildText.textContent = info.platform.id !== 'unknown' ? `Platform-specific instructions for ${info.platform.label}.` : '';
+  }
+  if (downloadWhyTooltip) downloadWhyTooltip.textContent = copy.note || '';
+  if (downloadModalSummary) {
+    downloadModalSummary.textContent = copy.summary;
+  }
+  if (downloadShot) downloadShot.hidden = !copy.shot;
+  if (downloadShotImage) {
+    if (copy.shot?.src) {
+      downloadShotImage.src = copy.shot.src;
+      downloadShotImage.alt = copy.shot.alt || '';
+      downloadShotImage.hidden = false;
+    } else {
+      downloadShotImage.removeAttribute('src');
+      downloadShotImage.alt = '';
+      downloadShotImage.hidden = true;
+    }
+  }
+  if (downloadShotLabel) downloadShotLabel.textContent = copy.shot?.label || '';
+  if (downloadManual) downloadManual.href = info.url;
+
+  if (downloadSteps) {
+    const stepItems = copy.steps.map((step) => {
+      const item = document.createElement('li');
+      if (step.includes('xattr ')) {
+        const [prefix, command] = step.split(': ');
+        item.append(`${prefix}: `);
+        const commandWrap = document.createElement('span');
+        commandWrap.className = 'download-command';
+        const code = document.createElement('code');
+        code.textContent = command;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = 'Copy';
+        button.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(command);
+            button.textContent = 'Copied';
+            window.setTimeout(() => {
+              button.textContent = 'Copy';
+            }, 1600);
+          } catch {
+            button.textContent = 'Select text';
+          }
+        });
+        commandWrap.append(code, button, createTooltipLink('What is this doing?', quarantineHelpText, 'download-command-help'));
+        item.append(commandWrap);
+      } else {
+        item.textContent = step;
+      }
+      return item;
+    });
+    downloadSteps.replaceChildren(...stepItems);
+  }
+}
+
+function startDownloadCountdown(info) {
+  window.clearInterval(countdownTimer);
+
+  let seconds = 4;
+  if (downloadCountdown) downloadCountdown.textContent = String(seconds);
+  if (downloadCountdownWrap) downloadCountdownWrap.hidden = false;
+  if (downloadStarted) downloadStarted.hidden = true;
+
+  countdownTimer = window.setInterval(() => {
+    seconds -= 1;
+    if (downloadCountdown) downloadCountdown.textContent = String(Math.max(seconds, 0));
+
+    if (seconds <= 0) {
+      window.clearInterval(countdownTimer);
+      countdownTimer = null;
+      triggerDownload(info.url);
+      if (downloadCountdownWrap) downloadCountdownWrap.hidden = true;
+      if (downloadStarted) downloadStarted.hidden = false;
+    }
+  }, 1000);
+}
+
+function openDownloadModal(info) {
+  if (!downloadModal) {
+    window.location.href = info.url;
+    return;
+  }
+
+  renderDownloadModal(info);
+  if (typeof downloadModal.showModal === 'function') {
+    downloadModal.showModal();
+  } else {
+    downloadModal.setAttribute('open', '');
+  }
+  startDownloadCountdown(info);
 }
 
 function setTheme(id, options = {}) {
@@ -222,6 +517,38 @@ themeButtons.forEach((button) => {
   button.addEventListener('click', () => {
     setTheme(button.dataset.themeOption, { animate: true });
   });
+});
+
+downloadLinks.forEach((downloadLink) => {
+  downloadLink.addEventListener('click', async (event) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    event.preventDefault();
+    const info = await resolveDownloadInfo();
+    openDownloadModal(info);
+  });
+});
+
+downloadManual?.addEventListener('click', () => {
+  window.clearInterval(countdownTimer);
+  countdownTimer = null;
+  if (downloadCountdownWrap) downloadCountdownWrap.hidden = true;
+  if (downloadStarted) downloadStarted.hidden = false;
+});
+
+downloadClose?.addEventListener('click', () => {
+  window.clearInterval(countdownTimer);
+  countdownTimer = null;
+  if (typeof downloadModal?.close === 'function') {
+    downloadModal.close();
+  } else {
+    downloadModal?.removeAttribute('open');
+  }
+});
+
+downloadModal?.addEventListener('cancel', () => {
+  window.clearInterval(countdownTimer);
+  countdownTimer = null;
 });
 
 const savedTheme = localStorage.getItem('dj-scrobbler-theme');

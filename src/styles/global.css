@@ -656,6 +656,267 @@ h3 {
   font-size: 12px;
 }
 
+.download-modal {
+  width: min(760px, calc(100vw - 28px));
+  max-height: min(760px, calc(100vh - 28px));
+  margin: auto;
+  padding: 0;
+  overflow: visible;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+}
+
+.download-modal::backdrop {
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(10px);
+}
+
+.download-modal-window {
+  position: relative;
+  max-height: calc(100vh - 42px);
+  overflow: auto;
+  overflow-x: hidden;
+  padding: 24px 28px 18px;
+  border: 1px solid color-mix(in srgb, var(--accent) 44%, var(--border));
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--border) 18%, transparent) 1px, transparent 1px),
+    linear-gradient(180deg, color-mix(in srgb, var(--border) 14%, transparent) 1px, transparent 1px),
+    color-mix(in srgb, var(--bg2) 94%, #000);
+  background-size: 44px 44px;
+  box-shadow: 0 30px 90px var(--shadow);
+}
+
+.download-modal-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: baseline;
+  padding-right: 42px;
+  margin: 4px 0 8px;
+}
+
+.download-modal h2 {
+  margin: 4px 0 8px;
+  padding-right: 0;
+  font-size: 24px;
+}
+
+.download-tooltip {
+  position: relative;
+  display: inline-flex;
+}
+
+.download-tooltip button {
+  padding: 0;
+  color: var(--accent2);
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-weight: 720;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+
+.download-tooltip [role='tooltip'] {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  top: calc(100% + 8px);
+  width: min(360px, calc(100vw - 72px));
+  padding: 10px 12px;
+  box-sizing: border-box;
+  color: var(--text);
+  background: color-mix(in srgb, var(--bg) 92%, #000);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 18px 44px var(--shadow);
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: left;
+  white-space: normal;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.download-build-note .download-tooltip [role='tooltip'] {
+  right: 0;
+  left: auto;
+}
+
+.download-tooltip:hover [role='tooltip'],
+.download-tooltip:focus-within [role='tooltip'] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text2);
+  background: color-mix(in srgb, var(--bg3) 72%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.modal-close:hover,
+.modal-close:focus-visible {
+  color: var(--text);
+  border-color: var(--accent);
+  outline: none;
+}
+
+.download-modal-summary {
+  margin-bottom: 14px;
+  color: color-mix(in srgb, var(--text) 82%, var(--text2));
+  font-size: 13px;
+}
+
+.download-build-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+  margin-bottom: 8px;
+  color: var(--text2);
+  font-size: 12px;
+}
+
+.download-steps {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding-left: 24px;
+  color: color-mix(in srgb, var(--text) 88%, var(--text2));
+  font-size: 13px;
+}
+
+.download-steps li::marker {
+  color: var(--accent2);
+  font-weight: 760;
+}
+
+.download-command {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: stretch;
+  margin-top: 6px;
+  max-width: min(660px, 100%);
+}
+
+.download-command code {
+  display: block;
+  min-width: 0;
+  padding: 9px 10px;
+  overflow-x: auto;
+  color: var(--text);
+  background: color-mix(in srgb, var(--bg) 82%, #000);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.download-command-help {
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-self: start;
+  margin-left: 3px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.download-command-help [role='tooltip'] {
+  top: auto;
+  bottom: calc(100% + 8px);
+  left: 0;
+  right: auto;
+  width: min(320px, calc(100vw - 86px));
+}
+
+.download-command > button {
+  min-width: 72px;
+  padding: 0 10px;
+  color: #05070d;
+  background: var(--accent2);
+  border: 1px solid var(--accent2);
+  border-radius: 6px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 760;
+  cursor: pointer;
+}
+
+.download-command > button:hover,
+.download-command > button:focus-visible {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  outline: none;
+}
+
+.download-shot {
+  min-height: 0;
+  display: grid;
+  gap: 8px;
+  place-items: center;
+  margin-bottom: 14px;
+  padding: 14px;
+  border: 1px dashed color-mix(in srgb, var(--accent) 44%, var(--border));
+  border-radius: 8px;
+  color: var(--text2);
+  background: color-mix(in srgb, var(--bg) 52%, transparent);
+  text-align: center;
+  font-size: 12px;
+}
+
+.download-shot img {
+  width: min(210px, 100%);
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.28);
+}
+
+.download-countdown {
+  margin: 0 0 4px;
+  color: var(--text2);
+  font-size: 12px;
+}
+
+.download-countdown strong {
+  color: var(--accent2);
+}
+
+.download-help {
+  margin: 0;
+  color: var(--text2);
+  font-size: 12px;
+}
+
+.download-help a {
+  color: var(--accent2);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.download-help a:hover,
+.download-help a:focus-visible {
+  color: var(--accent);
+  outline: none;
+}
+
 @media (max-width: 1500px) {
   .hero {
     grid-template-columns: minmax(520px, 0.9fr) minmax(430px, 0.7fr);
@@ -1008,6 +1269,30 @@ h3 {
   .download-row {
     grid-template-columns: 1fr;
     gap: 4px;
+  }
+
+  .download-modal-window {
+    padding: 22px;
+  }
+
+  .download-modal h2 {
+    font-size: 21px;
+  }
+
+  .download-modal-heading {
+    padding-right: 38px;
+  }
+
+  .download-command {
+    grid-template-columns: 1fr;
+  }
+
+  .download-command code {
+    grid-column: auto;
+  }
+
+  .download-command > button {
+    min-height: 34px;
   }
 
   .lastfm-mark {

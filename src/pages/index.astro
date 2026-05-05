@@ -27,7 +27,7 @@ const themes = [
 ];
 
 const repoUrl = 'https://github.com/ericcastro/dj-scrobbler';
-const releasesUrl = 'https://github.com/ericcastro/dj-scrobbler/releases/latest';
+const releasesUrl = 'https://github.com/ericcastro/dj-scrobbler/releases';
 const allReleasesUrl = 'https://github.com/ericcastro/dj-scrobbler/releases';
 ---
 
@@ -216,6 +216,50 @@ const allReleasesUrl = 'https://github.com/ericcastro/dj-scrobbler/releases';
       <span>&copy; <span data-year>2026</span> Eric Castro - All rights reserved.</span>
       
     </footer>
+
+    <dialog class="download-modal" data-download-modal aria-labelledby="download-modal-title">
+      <div class="download-modal-window">
+        <button class="modal-close" type="button" aria-label="Close download instructions" data-download-close>
+          &times;
+        </button>
+
+        <div class="download-modal-heading">
+          <h2 id="download-modal-title" data-download-modal-title>Download is starting...</h2>
+        </div>
+        <p class="download-build-note" data-download-build-note hidden>
+          <span data-download-build-text></span>
+          <span class="download-tooltip download-why">
+            <button type="button" data-download-why aria-describedby="download-why-tooltip">Why is this needed?</button>
+            <span id="download-why-tooltip" role="tooltip" data-download-why-tooltip>
+              DJ Scrobbler is a public beta.
+            </span>
+          </span>
+        </p>
+        <p class="download-modal-summary" data-download-modal-summary>
+          This is a prerelease build. Your download will start in a few seconds.
+        </p>
+
+        <div class="download-shot" data-download-shot hidden>
+          <img alt="" data-download-shot-image hidden />
+          <span data-download-shot-label>Setup screenshot placeholder</span>
+        </div>
+
+        <ol class="download-steps" data-download-steps>
+          <li>Download the latest beta release.</li>
+          <li>Open the installer.</li>
+          <li>Follow the operating system prompt.</li>
+        </ol>
+
+        <p class="download-countdown">
+          <span data-download-countdown-wrap>Download starts in <strong data-download-countdown>4</strong>s.</span>
+          <span data-download-started hidden>Download started. Keep this window open for the setup steps.</span>
+        </p>
+
+        <p class="download-help">
+          If the download did not start automatically, <a href={allReleasesUrl} data-download-manual>click here</a>.
+        </p>
+      </div>
+    </dialog>
 
     <script type="module" src={themeScriptUrl}></script>
   </body>
