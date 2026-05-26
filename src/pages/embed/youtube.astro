@@ -48,6 +48,56 @@ const pageTitle = 'DJ Scrobbler YouTube Embed';
         background: #000;
       }
 
+      /* ── YouTube UI overlays ──────────────────────────────────────────────────
+         Absolutely-positioned black patches that sit above the iframe in the
+         compositor, masking YouTube's native overlays (title card, pause icon,
+         watermark, end screen) without needing cross-origin iframe access.
+
+         Default: opacity 0 (invisible).  .active: opacity 1, instant (no
+         transition on the way in so nothing bleeds through; smooth fade-out
+         on the way back via the base transition). */
+
+      main { position: relative; }
+
+      .yt-overlay {
+        position: absolute;
+        background: #000;
+        pointer-events: none;
+        z-index: 10;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .yt-overlay.active {
+        opacity: 1;
+        transition: none;
+      }
+
+      /* Title card — top strip */
+      #yt-ov-top {
+        top: 0; left: 0; right: 0;
+        height: 72px;
+      }
+
+      /* Pause / play icon — centred circle */
+      #yt-ov-center {
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 92px; height: 92px;
+        border-radius: 50%;
+      }
+
+      /* End screen ("more videos") — full cover */
+      #yt-ov-end { inset: 0; }
+
+      /* Watermark logo — bottom-right patch (always on) */
+      #yt-ov-logo {
+        bottom: 4px; right: 4px;
+        width: 70px; height: 30px;
+        border-radius: 3px;
+        opacity: 1;          /* always visible — no .active needed */
+        transition: none;
+      }
+
       .empty-state {
         min-height: 100%;
         display: grid;
@@ -163,14 +213,49 @@ const pageTitle = 'DJ Scrobbler YouTube Embed';
         iframe.referrerPolicy = 'strict-origin-when-cross-origin';
         iframe.src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?${embedParams}`;
 
+        // Create overlay divs that sit above the iframe in the compositor,
+        // masking YouTube's native overlays without cross-origin iframe access.
+        function mkOv(id) {
+          const el = document.createElement('div');
+          el.id = id;
+          el.className = 'yt-overlay';
+          return el;
+        }
+        const ovTop    = mkOv('yt-ov-top');
+        const ovCenter = mkOv('yt-ov-center');
+        const ovEnd    = mkOv('yt-ov-end');
+        const ovLogo   = mkOv('yt-ov-logo');
+        ovLogo.classList.add('active'); // watermark: always covered
+
         root.className = '';
-        root.replaceChildren(iframe);
+        root.replaceChildren(iframe, ovTop, ovCenter, ovEnd, ovLogo);
 
         // Load the YouTube IFrame API and expose window.ytPlayer so DJ Scrobbler
         // can call playVideo / pauseVideo / getPlayerState / getCurrentTime / getDuration.
         const apiScript = document.createElement('script');
         apiScript.src = 'https://www.youtube.com/iframe_api';
         document.head.appendChild(apiScript);
+
+        let _hideTimer = null;
+        function onStateChange(event) {
+          clearTimeout(_hideTimer);
+          const s = event.data;
+          if (s === 2 /* PAUSED */) {
+            ovTop.classList.add('active');
+            ovCenter.classList.add('active');
+          } else if (s === 3 /* BUFFERING */) {
+            ovTop.classList.add('active');
+            ovCenter.classList.remove('active');
+          } else if (s === 1 /* PLAYING */) {
+            _hideTimer = setTimeout(() => {
+              ovTop.classList.remove('active');
+              ovCenter.classList.remove('active');
+            }, 400);
+            ovEnd.classList.remove('active');
+          } else if (s === 0 /* ENDED */) {
+            ovEnd.classList.add('active');
+          }
+        }
 
         window.onYouTubeIframeAPIReady = function () {
           // Wrap the already-rendered iframe. Only expose window.ytPlayer after
@@ -179,7 +264,8 @@ const pageTitle = 'DJ Scrobbler YouTube Embed';
             events: {
               onReady: function () {
                 window.ytPlayer = player;
-              }
+              },
+              onStateChange: onStateChange,
             }
           });
         };
