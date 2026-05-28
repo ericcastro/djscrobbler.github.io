@@ -854,6 +854,10 @@ h3 {
   box-shadow: 0 16px 45px rgba(0, 0, 0, 0.28);
 }
 
+.download-shot[data-platform="macos"] img {
+  width: min(260px, 100%);
+}
+
 .download-shot[data-platform="linux"] img {
   width: min(280px, 100%);
 }
