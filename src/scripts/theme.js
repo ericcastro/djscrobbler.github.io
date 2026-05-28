@@ -39,6 +39,7 @@ const downloadSteps = document.querySelector('[data-download-steps]');
 const downloadShot = document.querySelector('[data-download-shot]');
 const downloadShotImage = document.querySelector('[data-download-shot-image]');
 const downloadShotLabel = document.querySelector('[data-download-shot-label]');
+const downloadHelp = document.querySelector('[data-download-help]');
 const downloadManual = document.querySelector('[data-download-manual]');
 const downloadClose = document.querySelector('[data-download-close]');
 const year = document.querySelector('[data-year]');
@@ -55,6 +56,10 @@ let downloadInfoPromise = null;
 let countdownTimer = null;
 
 function basePlatformInfo() {
+  const ua = navigator.userAgent.toLowerCase();
+  if (ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod')) return { id: 'ios', label: 'iPhone / iPad' };
+  if (ua.includes('android')) return { id: 'android', label: 'Android' };
+
   const platform = navigator.userAgentData?.platform || navigator.platform || '';
   const value = platform.toLowerCase();
   if (value.includes('mac')) return { id: 'macos', label: 'macOS', arch: 'unknown' };
@@ -226,6 +231,15 @@ function installCopy(platform) {
     };
   }
 
+  if (platform.id === 'ios' || platform.id === 'android') {
+    return {
+      title: 'Desktop only — for now',
+      summary: `DJ Scrobbler is currently available on macOS, Windows, and Linux. There is no ${platform.id === 'ios' ? 'iOS' : 'Android'} app yet.`,
+      steps: [],
+      note: 'A mobile app — or a web version — is on the roadmap. For now, head to a desktop computer to download and use DJ Scrobbler.',
+    };
+  }
+
   return {
     title: 'Download is starting... (please read!)',
     summary: 'DJ Scrobbler is a public beta. Choose the file that matches your operating system on GitHub Releases.',
@@ -360,9 +374,11 @@ function renderDownloadModal(info) {
   const { copy } = info;
 
   if (downloadModalTitle) downloadModalTitle.textContent = copy.title;
+  const isMobile = info.platform.id === 'ios' || info.platform.id === 'android';
   if (downloadBuildNote) {
-    downloadBuildNote.hidden = info.platform.id === 'unknown';
+    downloadBuildNote.hidden = info.platform.id === 'unknown' || isMobile;
   }
+  if (downloadHelp) downloadHelp.hidden = isMobile;
   if (downloadBuildText) {
     downloadBuildText.textContent = info.platform.id !== 'unknown' ? `Installation instructions for ${info.platform.label}.` : '';
   }
@@ -389,6 +405,9 @@ function renderDownloadModal(info) {
   if (downloadManual) downloadManual.href = info.url;
 
   if (downloadSteps) {
+    downloadSteps.hidden = !copy.steps.length;
+  }
+  if (downloadSteps && copy.steps.length) {
     const stepItems = copy.steps.map((step) => {
       const item = document.createElement('li');
       if (step.includes('xattr ')) {
@@ -465,7 +484,8 @@ function openDownloadModal(info) {
   } else {
     downloadModal.setAttribute('open', '');
   }
-  startDownloadCountdown(info);
+  const isMobile = info.platform.id === 'ios' || info.platform.id === 'android';
+  if (!isMobile) startDownloadCountdown(info);
 }
 
 function setTheme(id, options = {}) {
