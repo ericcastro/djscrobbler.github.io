@@ -89,14 +89,6 @@ const pageTitle = 'DJ Scrobbler YouTube Embed';
       /* End screen ("more videos") — full cover */
       #yt-ov-end { inset: 0; }
 
-      /* Watermark logo — bottom-right patch (always on) */
-      #yt-ov-logo {
-        bottom: 4px; right: 4px;
-        width: 70px; height: 30px;
-        border-radius: 3px;
-        opacity: 1;          /* always visible — no .active needed */
-        transition: none;
-      }
 
       .empty-state {
         min-height: 100%;
@@ -224,11 +216,9 @@ const pageTitle = 'DJ Scrobbler YouTube Embed';
         const ovTop    = mkOv('yt-ov-top');
         const ovCenter = mkOv('yt-ov-center');
         const ovEnd    = mkOv('yt-ov-end');
-        const ovLogo   = mkOv('yt-ov-logo');
-        ovLogo.classList.add('active'); // watermark: always covered
 
         root.className = '';
-        root.replaceChildren(iframe, ovTop, ovCenter, ovEnd, ovLogo);
+        root.replaceChildren(iframe, ovTop, ovCenter, ovEnd);
 
         // Load the YouTube IFrame API and expose window.ytPlayer so DJ Scrobbler
         // can call playVideo / pauseVideo / getPlayerState / getCurrentTime / getDuration.
