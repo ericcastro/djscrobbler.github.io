@@ -880,6 +880,35 @@ h3 {
   outline: none;
 }
 
+/* Mobile "no app yet" message — compact, no instruction layout */
+.download-modal.is-mobile-message {
+  width: min(420px, calc(100vw - 28px));
+}
+
+.download-modal.is-mobile-message .download-modal-window {
+  background-image: none;
+  text-align: center;
+  padding: 32px 28px 28px;
+}
+
+.download-modal.is-mobile-message .download-modal-heading {
+  justify-content: center;
+  padding-right: 0;
+}
+
+.download-modal.is-mobile-message .download-modal-summary {
+  font-size: 15px;
+  color: var(--text2);
+  margin: 0;
+}
+
+.download-modal.is-mobile-message .download-build-note,
+.download-modal.is-mobile-message .download-shot,
+.download-modal.is-mobile-message .download-steps,
+.download-modal.is-mobile-message .download-help {
+  display: none;
+}
+
 @media (max-width: 1500px) {
   .hero {
     grid-template-columns: minmax(520px, 0.9fr) minmax(430px, 0.7fr);

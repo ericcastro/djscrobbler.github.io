@@ -375,6 +375,7 @@ function renderDownloadModal(info) {
 
   if (downloadModalTitle) downloadModalTitle.textContent = copy.title;
   const isMobile = info.platform.id === 'ios' || info.platform.id === 'android';
+  if (downloadModal) downloadModal.classList.toggle('is-mobile-message', isMobile);
   if (downloadBuildNote) {
     downloadBuildNote.hidden = info.platform.id === 'unknown' || isMobile;
   }
