@@ -232,11 +232,12 @@ function installCopy(platform) {
   }
 
   if (platform.id === 'ios' || platform.id === 'android') {
+    const os = platform.id === 'ios' ? 'iOS' : 'Android';
     return {
-      title: 'Desktop only — for now',
-      summary: `DJ Scrobbler is currently available on macOS, Windows, and Linux. There is no ${platform.id === 'ios' ? 'iOS' : 'Android'} app yet.`,
+      title: `${os} is coming`,
+      summary: `DJ Scrobbler is currently a desktop app (macOS, Windows, Linux). A native ${os} app is on the roadmap — it will be supported. For now, head to a desktop to download it.`,
       steps: [],
-      note: 'A mobile app — or a web version — is on the roadmap. For now, head to a desktop computer to download and use DJ Scrobbler.',
+      note: '',
     };
   }
 
