@@ -53,8 +53,8 @@ const allReleasesUrl = 'https://github.com/ericcastro/dj-scrobbler/releases';
 
         <nav class="nav-links" aria-label="Primary navigation">
           <a href="#download">Download</a>
-          <a href="#lastfm">About</a>
-          <a href={repoUrl}>GitHub</a>
+          <a href="#about">About</a>
+          <a href={repoUrl} target="_blank" rel="noopener noreferrer">GitHub</a>
         </nav>
       </header>
 
@@ -63,8 +63,8 @@ const allReleasesUrl = 'https://github.com/ericcastro/dj-scrobbler/releases';
           <img
             src="/assets/screenshot-neon-night.png"
             alt=""
-            width="1924"
-            height="1582"
+            width="2424"
+            height="1974"
             decoding="async"
             data-theme-screenshot
           />
@@ -104,14 +104,11 @@ const allReleasesUrl = 'https://github.com/ericcastro/dj-scrobbler/releases';
 
         <div class="screenshot-stage" data-theme-stage>
           <figure class="screenshot-card" aria-label="DJ Scrobbler desktop app screenshot">
-            <div class="window-strip" aria-hidden="true">
-              <span></span><span></span><span></span>
-            </div>
             <img
               src="/assets/screenshot-neon-night.png"
               alt="DJ Scrobbler desktop app in the Neon Night theme"
-              width="1924"
-              height="1582"
+              width="2424"
+              height="1974"
               loading="eager"
               data-theme-screenshot
               data-theme-screenshot-alt
@@ -140,7 +137,7 @@ const allReleasesUrl = 'https://github.com/ericcastro/dj-scrobbler/releases';
         </div>
       </section>
 
-      <section class="feature-band" aria-labelledby="why-title">
+      <section class="feature-band" id="about" aria-labelledby="why-title">
         <div class="section-heading">
           <p class="eyebrow">Ditch your web browser</p>
           <h2 id="why-title">Standalone  desktop app for DJ sets</h2>
@@ -249,11 +246,6 @@ const allReleasesUrl = 'https://github.com/ericcastro/dj-scrobbler/releases';
           <li>Open the installer.</li>
           <li>Follow the operating system prompt.</li>
         </ol>
-
-        <p class="download-countdown">
-          <span data-download-countdown-wrap>Download starts in <strong data-download-countdown>4</strong>s.</span>
-          <span data-download-started hidden>Download started. Keep this window open for the setup steps.</span>
-        </p>
 
         <p class="download-help">
           If the download did not start automatically, <a href={allReleasesUrl} data-download-manual>click here</a>.

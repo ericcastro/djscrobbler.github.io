@@ -39,9 +39,6 @@ const downloadSteps = document.querySelector('[data-download-steps]');
 const downloadShot = document.querySelector('[data-download-shot]');
 const downloadShotImage = document.querySelector('[data-download-shot-image]');
 const downloadShotLabel = document.querySelector('[data-download-shot-label]');
-const downloadCountdownWrap = document.querySelector('[data-download-countdown-wrap]');
-const downloadCountdown = document.querySelector('[data-download-countdown]');
-const downloadStarted = document.querySelector('[data-download-started]');
 const downloadManual = document.querySelector('[data-download-manual]');
 const downloadClose = document.querySelector('[data-download-close]');
 const year = document.querySelector('[data-year]');
@@ -175,7 +172,7 @@ function chooseDownloadAsset(assets, platform) {
 function installCopy(platform) {
   if (platform.id === 'macos') {
     return {
-      title: 'Installation Notes',
+      title: 'Download is starting... (please read!)',
       summary: 'Until DJ Scrobbler gets listed in the App Store, a few extra steps are required',
       steps: [        
         'Open the .dmg file, and copy DJ Scrobbler.app to Applications.',
@@ -184,7 +181,7 @@ function installCopy(platform) {
         'In the Terminal window, paste this command and press Enter: xattr -dr com.apple.quarantine "/Applications/DJ Scrobbler.app"',
         'Open DJ Scrobbler again from Applications.',
       ],
-      note: 'DJ Scrobbler is in public beta and is distributed directly from GitHub. Until it is notarized or listed in the App Store, macOS will purposely mislead you into believing that the app is "damaged", when in reality, they just want you to install in your system only what Apple allows you to.',
+      note: 'DJ Scrobbler is in public beta and distributed directly from GitHub.\n\nmacOS may claim the app is “damaged.” It isn’t - this is Apple not wanting to deal with the responsibility of "potentially malicious" software that didn\'t go through their own review process.\n\nDJ Scrobbler is open-source software. Everyone can see the source code and its actions on GitHub, exposing every build step so the missing layer of trust can be obtained without Apple\'s arbitrary opinion.',
       shot: {
         src: '/assets/macos-damaged-warning.png',
         alt: 'macOS warning saying DJ Scrobbler.app is damaged and cannot be opened.',
@@ -195,7 +192,7 @@ function installCopy(platform) {
 
   if (platform.id === 'windows') {
     return {
-      title: 'Download is starting...',
+      title: 'Download is starting... (please read!)',
       summary: 'DJ Scrobbler is a public beta. Because the app is new and unsigned, Microsoft Defender SmartScreen may show a warning.',
       steps: [
         'Run the downloaded Setup file.',
@@ -204,14 +201,16 @@ function installCopy(platform) {
       ],
       note: 'Windows may warn about new open-source apps until they build reputation or use paid code signing. Only continue when the file came from the official DJ Scrobbler GitHub release.',
       shot: {
-        label: 'Placeholder for the Windows SmartScreen / Run anyway screenshot.',
+        src: '/assets/windows-smartscreen.png',
+        alt: 'Windows SmartScreen warning — click More info, then Run anyway.',
+        label: 'Click More info, then Run anyway.',
       },
     };
   }
 
   if (platform.id === 'linux') {
     return {
-      title: 'Download is starting...',
+      title: 'Download is starting... (please read!)',
       summary: 'DJ Scrobbler is a public beta. The AppImage download should run without a package manager.',
       steps: [
         'Save the AppImage file.',
@@ -219,14 +218,16 @@ function installCopy(platform) {
         'Open the AppImage to launch DJ Scrobbler.',
       ],
       shot: {
-        label: 'Placeholder for a Linux executable-permission screenshot.',
+        src: '/assets/linux-permission.png',
+        alt: 'Linux file manager prompt to mark the AppImage as executable.',
+        label: 'Allow executing the file as a program when prompted.',
       },
       note: 'Some Linux desktops ask you to mark downloaded AppImages as executable before opening them. This is normal for standalone app files.',
     };
   }
 
   return {
-    title: 'Download is starting...',
+    title: 'Download is starting... (please read!)',
     summary: 'DJ Scrobbler is a public beta. Choose the file that matches your operating system on GitHub Releases.',
     steps: [
       'Open the latest release.',
@@ -248,9 +249,28 @@ function createTooltipLink(label, text, className = '') {
   button.textContent = label;
   const tooltip = document.createElement('span');
   tooltip.setAttribute('role', 'tooltip');
-  tooltip.textContent = text;
+  renderTooltipText(tooltip, text);
   wrap.append(button, tooltip);
   return wrap;
+}
+
+function renderTooltipText(tooltip, text) {
+  const paragraphs = String(text || '')
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  tooltip.replaceChildren();
+
+  paragraphs.forEach((paragraph, paragraphIndex) => {
+    const block = document.createElement('p');
+    paragraph.split('\n').forEach((line, lineIndex) => {
+      if (lineIndex > 0) block.append(document.createElement('br'));
+      block.append(document.createTextNode(line));
+    });
+    tooltip.append(block);
+    if (paragraphIndex < paragraphs.length - 1) tooltip.append(document.createTextNode(''));
+  });
 }
 
 function latestRelease(releases) {
@@ -344,13 +364,16 @@ function renderDownloadModal(info) {
     downloadBuildNote.hidden = info.platform.id === 'unknown';
   }
   if (downloadBuildText) {
-    downloadBuildText.textContent = info.platform.id !== 'unknown' ? `Platform-specific instructions for ${info.platform.label}.` : '';
+    downloadBuildText.textContent = info.platform.id !== 'unknown' ? `Installation instructions for ${info.platform.label}.` : '';
   }
-  if (downloadWhyTooltip) downloadWhyTooltip.textContent = copy.note || '';
+  if (downloadWhyTooltip) renderTooltipText(downloadWhyTooltip, copy.note || '');
   if (downloadModalSummary) {
     downloadModalSummary.textContent = copy.summary;
   }
-  if (downloadShot) downloadShot.hidden = !copy.shot;
+  if (downloadShot) {
+    downloadShot.hidden = !copy.shot;
+    downloadShot.dataset.platform = info.platform.id;
+  }
   if (downloadShotImage) {
     if (copy.shot?.src) {
       downloadShotImage.src = copy.shot.src;
@@ -400,24 +423,32 @@ function renderDownloadModal(info) {
   }
 }
 
+function setCountdownTitle(baseTitle, seconds) {
+  if (!downloadModalTitle) return;
+  if (seconds > 0) {
+    downloadModalTitle.textContent = baseTitle.replace('is starting...', `is starting in ${seconds}s...`);
+  } else {
+    downloadModalTitle.textContent = baseTitle.replace('is starting...', 'started');
+  }
+}
+
 function startDownloadCountdown(info) {
   window.clearInterval(countdownTimer);
 
   let seconds = 4;
-  if (downloadCountdown) downloadCountdown.textContent = String(seconds);
-  if (downloadCountdownWrap) downloadCountdownWrap.hidden = false;
-  if (downloadStarted) downloadStarted.hidden = true;
+  const baseTitle = info.copy.title;
+  setCountdownTitle(baseTitle, seconds);
 
   countdownTimer = window.setInterval(() => {
     seconds -= 1;
-    if (downloadCountdown) downloadCountdown.textContent = String(Math.max(seconds, 0));
 
     if (seconds <= 0) {
       window.clearInterval(countdownTimer);
       countdownTimer = null;
       triggerDownload(info.url);
-      if (downloadCountdownWrap) downloadCountdownWrap.hidden = true;
-      if (downloadStarted) downloadStarted.hidden = false;
+      setCountdownTitle(baseTitle, 0);
+    } else {
+      setCountdownTitle(baseTitle, seconds);
     }
   }, 1000);
 }
@@ -529,11 +560,11 @@ downloadLinks.forEach((downloadLink) => {
   });
 });
 
-downloadManual?.addEventListener('click', () => {
+downloadManual?.addEventListener('click', async () => {
   window.clearInterval(countdownTimer);
   countdownTimer = null;
-  if (downloadCountdownWrap) downloadCountdownWrap.hidden = true;
-  if (downloadStarted) downloadStarted.hidden = false;
+  const info = await resolveDownloadInfo();
+  if (downloadModalTitle) downloadModalTitle.textContent = info.copy.title;
 });
 
 downloadClose?.addEventListener('click', () => {
